@@ -67,22 +67,22 @@ function App() {
         <p>Call state <span id="call-state">-</span></p>
         <p><span id="recording-state"></span></p>
         <div>
-         {buttonDisable ?  <div><button 
-          className="kbc-style-button"  
-          id="join-meeting-button" 
-          type="button" 
-          disabled={false} onClick={() => joinMeeting()}
-            >
+          {buttonDisable ? <div><button
+            className="kbc-style-button"
+            id="join-meeting-button"
+            type="button"
+            disabled={false} onClick={() => joinMeeting()}
+          >
             Join Meeting
           </button></div> :
-           <div><button 
-           className="kbc-style-button" 
-           type="button"
-            onClick={async () => await leaveTeamsMeeting()}
-           >
-             Leave meeting
-           </button></div>
-        } 
+            <div><button
+              className="kbc-style-button"
+              type="button"
+              onClick={async () => await leaveTeamsMeeting()}
+            >
+              Leave meeting
+            </button></div>
+          }
         </div>
       </div>
     </div>
