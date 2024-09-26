@@ -9,7 +9,7 @@ let teamsMeetingJoinButton;
 let callStateElement;
 let recordingStateElement;
 let callAgent;
-const MEETING_LINK = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_NmNhZjQzODItY2QzMC00ZDViLWIzNTctMjA3ZTBiNzZhY2Fl%40thread.v2/0?context=%7b%22Tid%22%3a%2264af2aee-7d6c-49ac-a409-192d3fee73b8%22%2c%22Oid%22%3a%2272f4579d-e889-41ed-88d2-78c4f3a16cbf%22%7d"
+const MEETING_LINK = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_Mzk4OTZiMjEtMDljYS00YjdlLWE1ZjUtMzViNTYxNDM5Mjdh%40thread.v2/0?context=%7b%22Tid%22%3a%2264af2aee-7d6c-49ac-a409-192d3fee73b8%22%2c%22Oid%22%3a%2272f4579d-e889-41ed-88d2-78c4f3a16cbf%22%7d"
 
 function App() {
 
