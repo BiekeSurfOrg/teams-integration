@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-
+import axios from 'axios';
 const { CallClient, VideoStreamRenderer, LocalVideoStream } = require('@azure/communication-calling');
 const { AzureCommunicationTokenCredential } = require('@azure/communication-common');
 const { AzureLogger, setLogLevel } = require("@azure/logger");
@@ -24,6 +24,16 @@ const USER_CALLE_ID = "8:acs:ddebeccf-017d-4f10-bb3b-4444a5df94cb_00000022-d392-
 
 function App() {
 
+  function fetchTokenFromGitHub() {
+    return axios.get("https://api.github.com/repos/BiekeSurfOrg/acess-tokens/contents/acess-tokens.json", {
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28"
+      }
+    }).then((result => JSON.parse(atob(result.data.content).toString())
+    ))
+  }
+
+
   const [streamHidden, setStreamHidden] = useState(false);
 
   useEffect(() => {
@@ -36,6 +46,9 @@ function App() {
 
   const init = async () => {
     try {
+      const { caller, callee } = await fetchTokenFromGitHub()
+      console.log("caller: ", caller, "callee: ", callee);
+
       const callClient = new CallClient();
       const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
       callAgent = await callClient.createCallAgent(tokenCredential)
