@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 const { CallClient, VideoStreamRenderer, LocalVideoStream } = require('@azure/communication-calling');
 const { AzureCommunicationTokenCredential } = require('@azure/communication-common');
-const { AzureLogger, setLogLevel } = require("@azure/logger");
 
 
 let callAgent;
@@ -13,14 +12,11 @@ let incomingCall;
 let localVideoStream;
 let localVideoStreamRenderer;
 
-let initializeCallAgentButton = document.getElementById('initialize-call-agent');
-let startCallButton = document.getElementById('start-call-button');
-let acceptCallButton = document.getElementById('accept-call-button');
-let remoteVideosGallery = document.getElementById('remoteVideosGallery');
-let localVideoContainer = document.getElementById('localVideoContainer');
+let remoteVideosGallery;
+let localVideoContainer;
 
-const USER_ACCESS_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjExRkNCRjhEQzBFRTMzQUY3QkIwQTE3OUUzNjI0RUNBNjk1ODE2NjQiLCJ4NXQiOiJFZnlfamNEdU02OTdzS0Y1NDJKT3ltbFlGbVEiLCJ0eXAiOiJKV1QifQ.eyJza3lwZWlkIjoiYWNzOmRkZWJlY2NmLTAxN2QtNGYxMC1iYjNiLTQ0NDRhNWRmOTRjYl8wMDAwMDAyMi1kMzdkLWJlYWItODc0YS1hZDNhMGQwMDc4ODgiLCJzY3AiOjE3OTIsImNzaSI6IjE3Mjc0NDI3MjEiLCJleHAiOjE3Mjc1MjkxMjEsInJnbiI6ImVtZWEiLCJhY3NTY29wZSI6ImNoYXQsdm9pcCIsInJlc291cmNlSWQiOiJkZGViZWNjZi0wMTdkLTRmMTAtYmIzYi00NDQ0YTVkZjk0Y2IiLCJyZXNvdXJjZUxvY2F0aW9uIjoiZXVyb3BlIiwiaWF0IjoxNzI3NDQyNzIxfQ.o5vzsBoqXwtONJO7xoHlwbrP4IVPixr_SoN1OZDppQQovalD5PNdXme22AT7pViKEcYyBeRp580wCWsE3ZqGspwGu5V3Nk3LyMy0nkYem3hoZoGPZ6bGAeA99okBaNcpOeQFQ-o158AYcsWwyuJcav4_ImDDna01BRtXuToC_kmLtlTkgl8kwGH8Xr28pD5WiMO9QyRKQSuxcAyjdCVoE6nac2_rTEEZfYItMyTSDBIKDJn1vXwkl4WUsK3RC6akds0eXbibLBYSHM-gFS4iAwaShVHfuwctWBztWQzTuvBSlzaxllE0BX5KVcu2GpCBd2_JvSD_rSdTvH_qHPGf2A"
-const USER_CALLE_ID = "8:acs:ddebeccf-017d-4f10-bb3b-4444a5df94cb_00000022-d392-950a-a7ac-473a0d008847"
+let USER_ACCESS_TOKEN = ""
+let USER_CALLE_ID = ""
 
 function App() {
 
@@ -29,7 +25,12 @@ function App() {
       headers: {
         "X-GitHub-Api-Version": "2022-11-28"
       }
-    }).then((result => JSON.parse(atob(result.data.content).toString())
+    }).then((result => {
+
+      const { caller, callee } = JSON.parse(atob(result.data.content).toString())
+      USER_ACCESS_TOKEN = caller.userAcessToken
+      USER_CALLE_ID = callee.identity
+    }
     ))
   }
 
@@ -37,18 +38,15 @@ function App() {
   const [streamHidden, setStreamHidden] = useState(false);
 
   useEffect(() => {
-    setLogLevel('verbose');
-    AzureLogger.log = (...args) => {
-      console.log(...args);
-    };
+    remoteVideosGallery = document.getElementById('remoteVideosGallery');
+    localVideoContainer = document.getElementById('localVideoContainer');
     init();
   }, []);
 
   const init = async () => {
     try {
-      const { caller, callee } = await fetchTokenFromGitHub()
-      console.log("caller: ", caller, "callee: ", callee);
-
+      await fetchTokenFromGitHub()
+      console.log(USER_ACCESS_TOKEN, USER_CALLE_ID)
       const callClient = new CallClient();
       const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
       callAgent = await callClient.createCallAgent(tokenCredential)
@@ -60,15 +58,11 @@ function App() {
       callAgent.on('incomingCall', async (args) => {
         try {
           incomingCall = args.incomingCall;
-          acceptCallButton.disabled = false;
-          startCallButton.disabled = true;
         } catch (error) {
           console.error(error);
         }
       });
 
-      startCallButton.disabled = false;
-      initializeCallAgentButton.disabled = true;
     } catch (error) {
       console.error(error);
     }
@@ -77,6 +71,8 @@ function App() {
   const startVideoCall = async () => {
     try {
       const localVideoStream = await createLocalVideoStream();
+      console.log(localVideoStream);
+
       const videoOptions = localVideoStream ? { localVideoStreams: [localVideoStream] } : undefined;
       call = callAgent.startCall([{ communicationUserId: USER_CALLE_ID }], { videoOptions });
       // Subscribe to the call's properties and events.
@@ -215,6 +211,8 @@ function App() {
       // Create a renderer view for the remote video stream.
       view = await renderer.createView();
       // Attach the renderer view to the UI.
+      console.log(remoteVideoContainer, "Remote video container");
+
       remoteVideoContainer.appendChild(view.target);
       remoteVideosGallery.appendChild(remoteVideoContainer);
     }
@@ -270,7 +268,6 @@ function App() {
       localVideoStreamRenderer = new VideoStreamRenderer(localVideoStream);
       const view = await localVideoStreamRenderer.createView();
       setStreamHidden(false)
-      alert(view.target)
       localVideoContainer.appendChild(view.target);
     } catch (error) {
       console.error(error);
@@ -289,25 +286,21 @@ function App() {
     }
   }
 
-  const hangUp = async () => {
+  const hangUpVideoCall = async () => {
     await call.hangUp()
   }
 
   return (
     <div>
-      <h4>Azure Communication Services - Calling Web SDK</h4>
       <button id="start-call-button" type="button" onClick={() => startVideoCall()}>Start Call</button>
-      <button id="hangup-call-button" type="button" >Hang up Call</button>
+      <button id="hangup-call-button" type="button" onClick={() => hangUpVideoCall()} >Hang up Call</button>
       <button id="accept-call-button" type="button" >Accept Call</button>
       <button id="start-video-button" type="button">Start Video</button>
       <button id="stop-video-button" type="button">Stop Video</button>
+
+      <div id="remoteVideosGallery" >DockStore Agent:</div>
       <br />
-      <br />
-      <div id="connectedLabel" >Call is connected!</div>
-      <br />
-      <div id="remoteVideosGallery" >Remote participants' video streams:</div>
-      <br />
-      <div id="localVideoContainer" >Local video stream:</div>
+      <div id="localVideoContainer" >You:</div>
       <script src="./main.js"></script>
     </div>
   );
