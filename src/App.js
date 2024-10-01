@@ -34,8 +34,8 @@ function App() {
     ))
   }
 
-
-  const [streamHidden, setStreamHidden] = useState(false);
+  const [isCallActive, setCallActive] = useState(false);
+  const [isCameraEnabled, setEnableCamera] = useState(false);
 
   useEffect(() => {
     remoteVideosGallery = document.getElementById('remoteVideosGallery');
@@ -72,7 +72,8 @@ function App() {
     try {
       const localVideoStream = await createLocalVideoStream();
       console.log(localVideoStream);
-
+      setCallActive(true)
+      setEnableCamera(true)
       const videoOptions = localVideoStream ? { localVideoStreams: [localVideoStream] } : undefined;
       call = callAgent.startCall([{ communicationUserId: USER_CALLE_ID }], { videoOptions });
       // Subscribe to the call's properties and events.
@@ -242,9 +243,20 @@ function App() {
   }
 
 
-  const stopVideo = async () => {
+  const stopVideoInCall = async () => {
     try {
       await call.stopVideo(localVideoStream);
+      setEnableCamera(false)
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const startVideoInCall = async () => {
+    try {
+      const localVideoStream = await createLocalVideoStream();
+      await call.startVideo(localVideoStream);
+      setEnableCamera(true)
     } catch (error) {
       console.error(error);
     }
@@ -267,7 +279,6 @@ function App() {
     try {
       localVideoStreamRenderer = new VideoStreamRenderer(localVideoStream);
       const view = await localVideoStreamRenderer.createView();
-      setStreamHidden(false)
       localVideoContainer.appendChild(view.target);
     } catch (error) {
       console.error(error);
@@ -280,27 +291,34 @@ function App() {
   const removeLocalVideoStream = async () => {
     try {
       localVideoStreamRenderer.dispose();
-      setStreamHidden(true)
     } catch (error) {
       console.error(error);
     }
   }
 
   const hangUpVideoCall = async () => {
-    await call.hangUp()
+    await call.hangUp();
+    setCallActive(false)
   }
 
   return (
-    <div>
-      <button id="start-call-button" type="button" onClick={() => startVideoCall()}>Start Call</button>
-      <button id="hangup-call-button" type="button" onClick={() => hangUpVideoCall()} >Hang up Call</button>
-      <button id="accept-call-button" type="button" >Accept Call</button>
-      <button id="start-video-button" type="button">Start Video</button>
-      <button id="stop-video-button" type="button">Stop Video</button>
+    <div className='main-content'>
+      <div className='video-container-holder'>
+        <div className='video-container'>
+          <div id="localVideoContainer" >You:</div>
+        </div>
+        <div className='video-container'>
+          <div id="remoteVideosGallery" >DockStore Agent:</div>
+        </div>
+      </div>
+      <div className='buttons'>
+        <button className={isCallActive ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="start-call-button" type="button" onClick={() => startVideoCall()}>Start Call</button>
+        <button className={!isCallActive ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="hangup-call-button" type="button" onClick={() => hangUpVideoCall()} >Hang up Call</button>
+        {/* <button id="accept-call-button" type="button" >Accept Call</button> */}
+        <button className={isCameraEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="start-video-button" type="button" onClick={() => startVideoInCall()}>Start Video</button>
+        <button className={!isCameraEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} type="button" onClick={() => stopVideoInCall()}>Stop Video</button>
+      </div>
 
-      <div id="remoteVideosGallery" >DockStore Agent:</div>
-      <br />
-      <div id="localVideoContainer" >You:</div>
       <script src="./main.js"></script>
     </div>
   );
