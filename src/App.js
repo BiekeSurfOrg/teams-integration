@@ -113,8 +113,9 @@ function App() {
         console.log(`Call state changed: ${call.state}`);
         if (call.state === 'Connected') {
         } else if (call.state === 'Disconnected') {
-          setStartVideoEnabled(false)
-          setStopVideoEnabled(false)
+          setStartVideoEnabled(false);
+          setStopVideoEnabled(false);
+          setCallActive(false)
           console.log(`Call ended, call end reason={code=${call.callEndReason.code}, subCode=${call.callEndReason.subCode}}`);
         }
       });
