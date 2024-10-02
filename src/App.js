@@ -290,6 +290,7 @@ function App() {
    */
   const removeLocalVideoStream = async () => {
     try {
+      setCallActive(false)
       localVideoStreamRenderer.dispose();
     } catch (error) {
       console.error(error);
