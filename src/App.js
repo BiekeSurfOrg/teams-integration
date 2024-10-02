@@ -313,10 +313,10 @@ function App() {
     <div className='main-content'>
       <div className='video-container-holder'>
         <div className='video-container'>
-          <div id="localVideoContainer" >You:</div>
+          <div id="remoteVideosGallery" >DockStore Agent:</div>
         </div>
         <div className='video-container'>
-          <div id="remoteVideosGallery" >DockStore Agent:</div>
+          <div id="localVideoContainer" >You:</div>
         </div>
       </div>
       <div className='buttons'>
