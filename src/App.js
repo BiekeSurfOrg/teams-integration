@@ -35,7 +35,8 @@ function App() {
   }
 
   const [isCallActive, setCallActive] = useState(false);
-  const [isCameraEnabled, setEnableCamera] = useState(false);
+  const [isStartVideoEnabled, setStartVideoEnabled] = useState(false);
+  const [isStopVideoEnabled, setStopVideoEnabled] = useState(false);
 
   useEffect(() => {
     remoteVideosGallery = document.getElementById('remoteVideosGallery');
@@ -73,7 +74,8 @@ function App() {
       const localVideoStream = await createLocalVideoStream();
       console.log(localVideoStream);
       setCallActive(true)
-      setEnableCamera(true)
+      setStartVideoEnabled(false)
+      setStopVideoEnabled(true)
       const videoOptions = localVideoStream ? { localVideoStreams: [localVideoStream] } : undefined;
       call = callAgent.startCall([{ communicationUserId: USER_CALLE_ID }], { videoOptions });
       // Subscribe to the call's properties and events.
@@ -111,6 +113,8 @@ function App() {
         console.log(`Call state changed: ${call.state}`);
         if (call.state === 'Connected') {
         } else if (call.state === 'Disconnected') {
+          setStartVideoEnabled(false)
+          setStopVideoEnabled(false)
           console.log(`Call ended, call end reason={code=${call.callEndReason.code}, subCode=${call.callEndReason.subCode}}`);
         }
       });
@@ -246,7 +250,8 @@ function App() {
   const stopVideoInCall = async () => {
     try {
       await call.stopVideo(localVideoStream);
-      setEnableCamera(false)
+      setStopVideoEnabled(false)
+      setStartVideoEnabled(true)
     } catch (error) {
       console.error(error);
     }
@@ -256,7 +261,8 @@ function App() {
     try {
       const localVideoStream = await createLocalVideoStream();
       await call.startVideo(localVideoStream);
-      setEnableCamera(true)
+      setStopVideoEnabled(true)
+      setStartVideoEnabled(false)
     } catch (error) {
       console.error(error);
     }
@@ -290,7 +296,7 @@ function App() {
    */
   const removeLocalVideoStream = async () => {
     try {
-      setCallActive(false)
+      // setCallActive(false)
       localVideoStreamRenderer.dispose();
     } catch (error) {
       console.error(error);
@@ -316,8 +322,8 @@ function App() {
         <button className={isCallActive ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="start-call-button" type="button" onClick={() => startVideoCall()}>Start Call</button>
         <button className={!isCallActive ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="hangup-call-button" type="button" onClick={() => hangUpVideoCall()} >Hang up Call</button>
         {/* <button id="accept-call-button" type="button" >Accept Call</button> */}
-        <button className={isCameraEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="start-video-button" type="button" onClick={() => startVideoInCall()}>Start Video</button>
-        <button className={!isCameraEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} type="button" onClick={() => stopVideoInCall()}>Stop Video</button>
+        <button className={!isStartVideoEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} id="start-video-button" type="button" onClick={() => startVideoInCall()}>Start Video</button>
+        <button className={!isStopVideoEnabled ? 'kbc-style-button button-dissabled' : 'kbc-style-button'} type="button" onClick={() => stopVideoInCall()}>Stop Video</button>
       </div>
 
       <script src="./main.js"></script>
