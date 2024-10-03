@@ -1,12 +1,26 @@
 # Teams Integration 
 
+## 2 Apps on the 2 branches.
+1. master - join teams meeting
+2. better-UI the current 1:1 video call
+
 ## Available Scripts
 
-In the project directory, you can run:
-
 ### `npm run start-dev`
+(Use for local development)
+Is used to start the local development server/env.
 
-to start the local env server
+###   `start`
+Is used to serve the applications build(dist) folder when deployed.
+
+###  `start-dev-server`
+Is used to imitate the deployed product by building the app and serving the build(dist) folder.
+
+###  `build`
+Builds the application.
+
+###    `test`
+Runs the test's which we dont have. :)
 
 ## Starting the project
 
@@ -40,4 +54,8 @@ startVideoInCall: Starts the camera while already in the call and updates the st
 
 stopVideoInCall: Stops the camera while already in the call and updates the state of the buttons.
 
- 
+ ## Deployment 
+
+ Currently all applications are deployed on heroku with my (BorisStankov98) GitHub account and the repositories are forks from the BiekeSurfOrg GitHub Account. 
+
+ The whole deployment process is automated via the scripts mentioned above, so all you need to do in Heroku is select the correct branch you would like to deploy and click on deploy,the rest is taken care of. 
